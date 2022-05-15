@@ -9,7 +9,6 @@ import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
-import { RichText } from "prismic-dom";
 
 interface Post {
   uid?: string;
@@ -31,12 +30,34 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
-  const [posts, setPosts] = useState(postsPagination.results);
+  const [posts, setPosts] = useState(postsPagination);
   const [nextPage, setNextPage] = useState(null);
 
   useEffect(() => {
     if (nextPage != null){
-      console.log(nextPage)
+       fetch(nextPage)
+        .then(response => response.json())
+        .then(data => 
+            {
+              let otherPosts = data.results.map(post => { return {
+                uid: post.uid,
+                first_publication_date: format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                  locale: ptBR,
+                }),
+                data: {
+                  title: post.data.title,
+                  subtitle: post.data.subtitle,
+                  author: post.data.author
+                }
+              }});
+           
+              setNextPage(data.next_page);
+              setPosts({
+                next_page: data.next_page,
+                results: [...posts.results, ...otherPosts]
+              });
+            }
+          )
     }
   });
 
@@ -48,7 +69,7 @@ export default function Home({ postsPagination }: HomeProps) {
 
       <main className={styles.container}>
         <div className={styles.posts}>
-          { posts.map(post => (
+          { posts.results.map(post => (
             <a key={post.uid}>
               <strong>{post.data.title}</strong>
               <p>{post.data.subtitle}</p>
@@ -58,9 +79,13 @@ export default function Home({ postsPagination }: HomeProps) {
             </a>
           )) }
         </div>
-        <button type="button" className={styles.moreButton} onClick={() => setNextPage(postsPagination.next_page)}>
-          <span>Carregar mais posts</span>
-        </button>
+        {
+          posts.next_page !== null ?
+            <button type="button" className={styles.moreButton} onClick={() => setNextPage(posts.next_page)}>
+              <span>Carregar mais posts</span>
+            </button> :
+            <br />
+        }
       </main>
     </>
   );
