@@ -9,6 +9,8 @@ import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import Link from "next/link";
+import React from "react";
 
 interface Post {
   uid?: string;
@@ -64,26 +66,33 @@ export default function Home({ postsPagination }: HomeProps) {
   return (
     <>
       <Head>
-        <title>Home</title>
+        <title>Spacetraveling</title>
       </Head>
 
       <main className={styles.container}>
         <div className={styles.posts}>
           { posts.results.map(post => (
-            <a key={post.uid}>
-              <strong>{post.data.title}</strong>
-              <p>{post.data.subtitle}</p>
-              <div className={styles.info}>
-                <time><FiCalendar size={20} /> &ensp; {post.first_publication_date}</time> <span><FiUser size={20} /> &ensp; {post.data.author}</span>
-              </div>
-            </a>
+            <React.Fragment key={post.uid}>
+              <Link href={`/post/${post.uid}`}>
+                <a>
+                  <strong>{post.data.title}</strong>
+                  <p>{post.data.subtitle}</p>
+                  <div className={styles.info}>
+                    <time><FiCalendar size={20} /> &nbsp; {format(new Date(post.first_publication_date),'dd MMM yyyy', {locale: ptBR})}</time> <span><FiUser size={20} /> &nbsp; {post.data.author}</span>
+                  </div>
+                </a>
+              </Link>
+            </React.Fragment>
           )) }
         </div>
         {
           posts.next_page !== null ?
-            <button type="button" className={styles.moreButton} onClick={() => setNextPage(posts.next_page)}>
-              <span>Carregar mais posts</span>
-            </button> :
+            <div className={styles.containerMoreButton}>
+              <button type="button" className={styles.moreButton} onClick={() => setNextPage(posts.next_page)}>
+                <span>Carregar mais posts</span>
+              </button>
+            </div>
+            :
             <br />
         }
       </main>
@@ -98,16 +107,15 @@ export const getStaticProps: GetStaticProps = async () => {
       field: 'document.first_publication_date',
       direction: 'desc'
     },
-    pageSize: 3
+    pageSize: 3,
+    page: 1
   });
 
   //console.log(JSON.stringify(postsResponse, null, 2));
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(new Date(post.first_publication_date),'dd MMM yyyy', {
-        locale: ptBR,
-      }),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -117,7 +125,7 @@ export const getStaticProps: GetStaticProps = async () => {
   });
 
   const nextPage = postsResponse.next_page;
-;
+
   return {
     props: {
       postsPagination:{

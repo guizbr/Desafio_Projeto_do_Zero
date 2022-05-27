@@ -1,12 +1,11 @@
 .container {
-    max-width: 720px;
     margin: 0 auto;
     padding: 0 2rem;
 }
 
 .posts {
     max-width: 720px;
-    margin: 4rem auto 0;
+    margin: 2rem auto 0;
 
     a {
         cursor: pointer;
@@ -57,20 +56,24 @@
     }
 }
 
-.moreButton {
-    font-size: 1.125rem;
-    font-weight: 600;
-    line-height: 1.36rem;
-    border: 0;
+.containerMoreButton {
+    max-width: 720px;
+    margin: 4rem auto 4rem;
 
-    background-color: var(--black-800);
-    color: var(--pink);
+    .moreButton {
+        font-size: 1.125rem;
+        font-weight: 600;
+        line-height: 1.36rem;
+        border: 0;
+        padding: 0;
 
-    margin: 4rem 0;
+        background-color: var(--black-800);
+        color: var(--pink);
 
-    transition: filter 0.2s;
+        transition: filter 0.2s;
 
-    &:hover span {
-        filter: brightness(0.8);
+        &:hover span {
+            filter: brightness(0.8);
+        }
     }
 }
